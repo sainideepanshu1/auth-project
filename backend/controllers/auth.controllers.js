@@ -6,7 +6,6 @@ import {
   sendResetPasswordEmail,
   sendResetSuccessfulEmail,
   sendVerificationEmail,
-  sendWelcomeEmail,
 } from "../mailtrap/email.js";
 import crypto from "crypto";
 
@@ -45,7 +44,12 @@ export const signup = async (req, res) => {
     res.status(201).json({
       success: true,
       message: "User created Successfully",
-      user: { ...user._doc, password: undefined },
+      user: {
+        ...user._doc,
+        password: undefined,
+        verificationToken: undefined,
+        verificationTokenExpiresAt: undefined,
+      },
     });
   } catch (error) {
     res.status(400).json({ success: false, message: error.message });
@@ -71,7 +75,6 @@ export const verifyEmail = async (req, res) => {
     user.verificationTokenExpiresAt = undefined;
 
     await user.save();
-    await sendWelcomeEmail(user.email, user.name);
 
     res.status(200).json({
       success: true,
